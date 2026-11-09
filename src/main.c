@@ -1,23 +1,11 @@
 #include <X11/Xlib.h>
 #include <stdlib.h>
+#include "platform/x11_window.h"
 
 int main(void)
 {
     Display *display = XOpenDisplay(NULL);
-    if (!display)
-        return EXIT_FAILURE;
-
-    int screen = DefaultScreen(display);
-
-    Window window = XCreateSimpleWindow(
-        display,
-        RootWindow(display, screen),
-        100, 100,
-        800, 600,
-        1,
-        BlackPixel(display, screen),
-        WhitePixel(display, screen)
-    );
+    Window window = createWindow(display);
 
     XStoreName(display, window, "My Browser");
     XMapWindow(display, window);

@@ -8,6 +8,8 @@ int main(void)
 {
     Display *display = XOpenDisplay(NULL);
     Window window = createWindow(display);
+    Atom wm_delete = XInternAtom(display, "WM_DELETE_WINDOW", False);
+    XSetWMProtocols(display, window, &wm_delete, 1);
 
     XStoreName(display, window, "My Browser");
     XSelectInput(display, window, 
@@ -22,9 +24,6 @@ int main(void)
     XEvent event;
     while (1) {
         XNextEvent(display, &event);
-
-        if (event.type == DestroyNotify)
-            break;
         
         switch(event.type)
         {
@@ -32,8 +31,10 @@ int main(void)
                 printf("key pressed\n");
                 break;
 
-            case DestroyNotify:
-                exit(EXIT_SUCCESS);
+            case ClientMessage:
+                if ((Atom)event.xclient.data.l[0] == wm_delete)
+                    goto clean_up;
+                break;
             
             case MotionNotify:
                 printf("mouse position (%d, %d)\n", event.xmotion.x, event.xmotion.y);
@@ -41,7 +42,9 @@ int main(void)
         }
     }
 
+clean_up:
+    XDestroyWindow(display, window);
     XCloseDisplay(display);
+
     return EXIT_SUCCESS;
 }
-
